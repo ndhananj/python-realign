@@ -1,7 +1,7 @@
 ################################################################################
 # allign one pdb to another
 #  Originally made by Nithin Dhananjayan (ndhanananj@ucdavis.edu)
-# Usage : python <this_file_name> <source_atom_csv file> <target_atom_csv file> <output file>
+# Usage : python <this_file_name> <source_atom_pdb file> <target_atom_pdb file> <output file>
 # example : python align_atom_pdb.py dimer2.pdb dimer1.pdb dimer2_aligned.pdb
 ################################################################################
 
