@@ -75,3 +75,7 @@ def realign(src_df,src_mu, trg_mu, rot_mat, stat_items=['X','Y','Z']):
 def align_df(src_df,trg_df, stat_items=['X','Y','Z']):
     src_mu, trg_mu, rot_mat = find_align(src_df,trg_df, stat_items=stat_items)
     return realign(src_df,src_mu, trg_mu, rot_mat, stat_items=stat_items)
+
+def align_df_using_ref(ref_src,ref_trg,src_df,stat_items=['X','Y','Z']):
+    src_mu, trg_mu, rot_mat = find_align(ref_src,ref_trg, stat_items=stat_items)
+    return realign(src_df,src_mu, trg_mu, rot_mat, stat_items=stat_items)
