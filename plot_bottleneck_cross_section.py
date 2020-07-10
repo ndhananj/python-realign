@@ -8,9 +8,14 @@ from projections import *
 from biopandas.pdb import PandasPdb
 
 if __name__ == "__main__":
-    df, radii, n, mean, coords, coords_u, coords_s, coords_vh, proj_xy, plot_df = proj_stats(sys.argv[1])
+    df, radii, n, mean, coords, coords_u, \
+        coords_s, coords_vh, proj_xy, plot_df, plot_range, plot_img = \
+        proj_stats(sys.argv[1])
+    print(coords_s)
     print(coords_s/np.sqrt(n))
+    print(plot_img.shape)
+    print(plot_range)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter('X', 'Y', s='R', color='b', alpha=1, data=plot_df)
+    ax.spy(plot_img)
     plt.show()
