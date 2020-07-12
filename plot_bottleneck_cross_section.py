@@ -11,11 +11,15 @@ if __name__ == "__main__":
     df, radii, n, mean, coords, coords_u, \
         coords_s, coords_vh, proj_xy, plot_df, plot_range, plot_img = \
         proj_stats(sys.argv[1])
+    print(plot_range)
     print(coords_s)
     print(coords_s/np.sqrt(n))
     print(plot_img.shape)
-    print(plot_range)
+    (neg_fill, centers) = get_negative_fill(plot_img)
+    print(len(centers))
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.spy(plot_img)
+    ax2 = fig.add_subplot(211)
+    ax2.spy(plot_img)
+    ax2 = fig.add_subplot(212)
+    ax2.spy(neg_fill)
     plt.show()
