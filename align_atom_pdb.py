@@ -13,13 +13,17 @@ if __name__ == "__main__":
     src_pdb.read_pdb(sys.argv[1])
     trg_pdb = PandasPdb()
     trg_pdb.read_pdb(sys.argv[2])
+    force_mirror = bool(sys.argv[3]) if(len(sys.argv)>3) else False
+    force_no_mirror = bool(sys.argv[4]) if(len(sys.argv)>4) else False
+    print("force_mirror : ", force_mirror, "force_no_mirror : ", force_no_mirror)
+
     src_df = src_pdb.df['ATOM']
     trg_df = trg_pdb.df['ATOM']
     stat_items=['x_coord', 'y_coord', 'z_coord']
     src_mu1, src_mu2, src_cov, src_s, src_u, src_v, src_df1, src_df2 = calc_stats(src_df,src_df,stat_items=stat_items)
     trg_mu1, trg_mu2, trg_cov, trg_s, trg_u, trg_v, trg_df1, src_df2 = calc_stats(trg_df,trg_df,stat_items=stat_items)
 
-    aligned_df, rot_mat = align_df(src_df,trg_df,stat_items=stat_items)
+    aligned_df, rot_mat = align_df(src_df,trg_df,stat_items=stat_items,force_mirror=force_mirror,force_no_mirror=force_no_mirror)
     alg_mu1, alg_mu2, alg_cov, alg_s, alg_u, alg_v, alg_df1, alg_df2 = calc_stats(aligned_df,aligned_df,stat_items=stat_items)
     aligned_pdb = PandasPdb()
     aligned_pdb.df['ATOM'] = aligned_df

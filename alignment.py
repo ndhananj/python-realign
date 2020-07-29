@@ -53,13 +53,15 @@ def plot_coords(ax, mean, s, u, df, stat_items=['X','Y','Z'],point_color='b', st
     ax.set_ylabel(stat_items[1])
     ax.set_zlabel(stat_items[2])
 
-def find_align(src_df,trg_df, stat_items=['X','Y','Z']):
+def find_align(src_df,trg_df, stat_items=['X','Y','Z'], force_mirror=False,force_no_mirror=False):
     src_mu,trg_mu,cov,s,u,v,src_df1,trg_df1=calc_stats(src_df,trg_df, stat_items=stat_items)
     rot_mat = np.matmul(u,v.transpose())
     det = np.linalg.det(rot_mat)
     print("Rotation determinant is : ", det)
-    if(det<0):
+    print("force_mirror : ", force_mirror, "force_no_mirror : ", force_no_mirror)
+    if((det<0) or force_mirror) and not(force_no_mirror):
         rot_mat =  np.matmul(np.matmul(u,np.diag([1,1,-1])),v.transpose())
+        print("Mirroring used")
     return src_mu, trg_mu, rot_mat
 
 def realign(src_df,src_mu, trg_mu, rot_mat, stat_items=['X','Y','Z']):
@@ -72,10 +74,10 @@ def realign(src_df,src_mu, trg_mu, rot_mat, stat_items=['X','Y','Z']):
     alg_df[stat_items]=df_coords[stat_items]
     return alg_df, rot_mat
 
-def align_df(src_df,trg_df, stat_items=['X','Y','Z']):
-    src_mu, trg_mu, rot_mat = find_align(src_df,trg_df, stat_items=stat_items)
+def align_df(src_df,trg_df, stat_items=['X','Y','Z'],force_mirror=False,force_no_mirror=False):
+    src_mu, trg_mu, rot_mat = find_align(src_df,trg_df, stat_items=stat_items,force_mirror=force_mirror,force_no_mirror=force_no_mirror)
     return realign(src_df,src_mu, trg_mu, rot_mat, stat_items=stat_items)
 
-def align_df_using_ref(ref_src,ref_trg,src_df,stat_items=['X','Y','Z']):
-    src_mu, trg_mu, rot_mat = find_align(ref_src,ref_trg, stat_items=stat_items)
+def align_df_using_ref(ref_src,ref_trg,src_df,stat_items=['X','Y','Z'],force_mirror=False,force_no_mirror=False):
+    src_mu, trg_mu, rot_mat = find_align(ref_src,ref_trg, stat_items=stat_items,force_mirror=force_mirror,force_no_mirror=force_no_mirror)
     return realign(src_df,src_mu, trg_mu, rot_mat, stat_items=stat_items)
