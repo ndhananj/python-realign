@@ -9,6 +9,8 @@ import numpy as np
 from numpy.linalg import svd
 import sys
 import matplotlib.pyplot as plt
+from centers import *
+from sklearn.decomposition import PCA
 
 stat_items=['x_coord', 'y_coord', 'z_coord']
 elem_item = 'element_symbol'
@@ -184,4 +186,91 @@ def get_negative_fill(plot_img,probe_elem='H',grid_size=0.01):
                 neg_fill[mask] = True
                 centers.append((row,col))
     (neg_fill, centers) = get_con_fill(neg_fill,X,Y,centers,con_len,probe_size)
-    return get_central_component(neg_fill,(int(lx/2),int(ly/2)),X,Y,con_len,probe_size)
+    return get_central_component(\
+       neg_fill,(int(lx/2),int(ly/2)),X,Y,con_len,probe_size)
+
+def get_3D_fill_grid(t_coords,probe_elem,res_thickness=0.0):
+    probe_size = vdwr[probe_elem]
+    con_len = 2*probe_size
+    maxs=np.max(t_coords,axis=0)-(probe_size+res_thickness)
+    mins=np.min(t_coords,axis=0)+(probe_size+res_thickness)
+    grid=np.mgrid[mins[0]:maxs[0]:con_len,\
+       mins[1]:maxs[1]:con_len,mins[2]:maxs[2]:con_len]
+    num_centers = grid.shape[1]*grid.shape[2]*grid.shape[3]
+    tg_coords=np.stack(grid,axis=-1).reshape((num_centers,3))
+    return tg_coords, probe_size, con_len, grid
+
+def num_3D_adj(my_center,bool_grid):
+    num=0
+    adjacency = range(-1,2)
+    for i in adjacency:
+        x=my_center[0]+i
+        if (x>=0) and (x<bool_grid.shape[0]):
+            for j in adjacency:
+                y = my_center[1]+j
+                if (y>=0) and (y<bool_grid.shape[1]):
+                    for k in adjacency:
+                        z = my_center[2]+k
+                        if (z>=0) and (z<bool_grid.shape[2]):
+                            num+=bool_grid[x,y,z]
+    return num
+
+def get_3D_con_fill(bool_grid,grid,recur=1,count=20):
+    toRet=bool_grid.copy()
+    print(len(np.argwhere(bool_grid)))
+    for center in np.argwhere(bool_grid):
+        if(num_3D_adj(center,bool_grid)<count):
+            toRet[center[0],center[1],center[2]]=False
+    print(len(np.argwhere(bool_grid)))
+    print(len(np.argwhere(toRet)))
+    return toRet if recur==0 else get_3D_con_fill(\
+        toRet,grid,recur=recur-1,count=count)
+
+def grid_to_centers(bool_grid,grid):
+    saved=[]
+    for center in np.argwhere(bool_grid):
+        saved.append([grid[0,center[0],0,0],\
+                     grid[1,0,center[1],0],\
+                     grid[2,0,0,center[2]]])
+    return np.array(saved)
+
+def get_3D_fill_from_grid(coords, radii, g_coords, probe_size, con_len, grid):
+    saved = []
+    bool_grid = np.zeros(grid.shape[1:]).astype(bool)
+    num_coords = coords.shape[0] # should also equal num_radii
+    print(bool_grid.shape)
+    xdiv = bool_grid.shape[1]*bool_grid.shape[2]
+    ydiv = bool_grid.shape[2]
+    for j in range(g_coords.shape[0]):
+        X = int(j/xdiv)
+        Y = int((j%xdiv)/ydiv)
+        Z = j%ydiv
+        should_save = True
+        for i in range(num_coords):
+            if np.linalg.norm(g_coords[j]-coords[i])<probe_size+radii[i]:
+                should_save = False
+                break
+        if should_save :
+            saved.append(g_coords[j])
+            bool_grid[X,Y,Z]=True
+    orig_centers = grid_to_centers(bool_grid,grid)
+    print(np.sum(np.array(saved)- orig_centers))
+    bool_grid=get_3D_con_fill(bool_grid,grid)
+    print(np.mean(orig_centers)-np.mean(grid_to_centers(bool_grid,grid)))
+    #return np.array(saved)
+    return grid_to_centers(bool_grid,grid)
+
+def get_negative_fill_3D(filename,out_file,probe_elem='H'):
+    df, radii, coords, n = pdb_atoms(filename)
+    pca=PCA(n_components=3)
+    pca.fit(coords)
+    t_coords = pca.transform(coords)
+    tg_coords, probe_size, con_len, grid = get_3D_fill_grid(t_coords,probe_elem)
+    print(tg_coords.shape)
+    tf_coords = get_3D_fill_from_grid(\
+        t_coords, radii, tg_coords, probe_size, con_len, grid)
+    print(tf_coords.shape)
+    f_coords = pca.inverse_transform(tf_coords)
+    centers = pd.DataFrame(data=f_coords,columns=[10,11,12])
+    output_centers(centers,probe_elem,out_file)
+    return coords
