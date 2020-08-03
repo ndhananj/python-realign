@@ -19,7 +19,8 @@ def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
         pdb.read_pdb(fitfile)
         trg_c = pdb.df['ATOM'].filter(items=stat_items).to_numpy()*0.1 #A to nm
         for i in range(src_cs_shape[0]):
-            src_mu, trg_mu, rot_mat = find_coords_align(src_cs[i],trg_c,unbias=False,force_mirror=False,force_no_mirror=False)
+            src_mu, trg_mu, rot_mat = find_coords_align(src_cs[i],trg_c,\
+                unbias=False,force_mirror=False,force_no_mirror=False)
             src_cs[i] = realign_coords(src_cs[i],src_mu, trg_mu, rot_mat)
         coords = src_cs.reshape((coords.shape[0],coords.shape[1]))
     mean1, mean2, cov, s, u, v = calc_coord_stats(coords,coords,unbias=unbias)
@@ -34,8 +35,9 @@ def shift_by_mode(df,primary_mode,indeces,mul):
     to_ret[stat_items] = coords
     return to_ret
 
-def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul):
-    mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=pdbfile)
+def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul,fit_using_pdb=False):
+    fitfile = pdbfile if fit_using_pdb else None
+    mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
     primary_mode = u[:,int(mode)].reshape(shift_shape)
     print("u[:,",mode,"] =",primary_mode)
