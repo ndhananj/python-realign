@@ -10,14 +10,14 @@ stat_items=['x_coord', 'y_coord', 'z_coord']
 def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
     xvg=read_xvg(xvgfile)
     df = xvg['data']
-    coords = df.filter(items=xvg['yaxis labels']).to_numpy()
+    coords = df.filter(items=xvg['yaxis labels']).to_numpy()*10 #nm to A
     if(fitfile):
         print("Fitting...")
         src_cs_shape = (coords.shape[0],int(coords.shape[1]/3),3)
         src_cs = coords.reshape(src_cs_shape)
         pdb = PandasPdb()
         pdb.read_pdb(fitfile)
-        trg_c = pdb.df['ATOM'].filter(items=stat_items).to_numpy()*0.1 #A to nm
+        trg_c = pdb.df['ATOM'].filter(items=stat_items).to_numpy()
         for i in range(src_cs_shape[0]):
             src_mu, trg_mu, rot_mat = find_coords_align(src_cs[i],trg_c,\
                 unbias=False,force_mirror=False,force_no_mirror=False)
