@@ -35,7 +35,7 @@ def shift_by_mode(df,primary_mode,indeces,mul):
     to_ret[stat_items] = coords
     return to_ret
 
-def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul,fit_using_pdb=False):
+def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul,fit_using_pdb=True):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
