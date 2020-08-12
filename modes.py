@@ -33,7 +33,7 @@ def get_masses_from_pdb_by_resn(pdb):
     residues=pdb.df['ATOM'][['residue_name']].to_numpy().tolist()
     masses=[residue_masses[residue[0]] for residue in residues]
     return masses
-    
+
 def save_matrix(filename,m):
     with open(filename,'wb') as f:
         np.save(f,m)
@@ -104,7 +104,7 @@ def make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
             records=['ATOM'], gz=False, append_newline=True)
 
 def modes(xvgfile,ndxfile,pdbfile,mode_idx,newpdbfile,mul,\
-    fit_using_pdb=True,ndx_name='C-alpha',movie_steps=400):
+    fit_using_pdb=True,ndx_name='C-alpha',movie_steps=200):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
