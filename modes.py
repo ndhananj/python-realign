@@ -59,6 +59,23 @@ def spring_constants_from_variances(D,T=293.1):
     R=8.3145
     return R*T/D
 
+def get_movie_muls(mul,movie_steps):
+    ts=np.linspace(-float(0),float(movie_steps),num=movie_steps+1)
+    muls=float(mul)*np.cos(2*np.pi*ts/movie_steps)
+    return muls
+
+def make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
+    ndx=read_ndx(ndxfile)
+    print(ndx[ndx_name])
+    ppdb=PandasPdb()
+    ppdb.read_pdb(pdbfile)
+    for i in range(len(muls)):
+        new_df = shift_by_mode(ppdb.df['ATOM'],mode,ndx[ndx_name],muls[i])
+        mode_pdb = PandasPdb()
+        mode_pdb.df['ATOM'] = new_df
+        mode_pdb.to_pdb(path=newpdbfile+str(i)+'.pdb',\
+            records=['ATOM'], gz=False, append_newline=True)
+
 def modes(xvgfile,ndxfile,pdbfile,mode_idx,newpdbfile,mul,\
     fit_using_pdb=True,ndx_name='C-alpha',movie_steps=400):
     fitfile = pdbfile if fit_using_pdb else None
@@ -66,15 +83,5 @@ def modes(xvgfile,ndxfile,pdbfile,mode_idx,newpdbfile,mul,\
     shift_shape = (int(u.shape[1]/3),3)
     mode = u[:,int(mode_idx)].reshape(shift_shape)
     print("u[:,",mode_idx,"] =",mode)
-    ndx=read_ndx(ndxfile)
-    print(ndx[ndx_name])
-    ppdb=PandasPdb()
-    ppdb.read_pdb(pdbfile)
-    ts=np.linspace(-float(0),float(movie_steps),num=movie_steps+1)
-    muls=float(mul)*np.cos(2*np.pi*ts/movie_steps)
-    for i in range(len(muls)):
-        new_df = shift_by_mode(ppdb.df['ATOM'],mode,ndx[ndx_name],muls[i])
-        mode_pdb = PandasPdb()
-        mode_pdb.df['ATOM'] = new_df
-        mode_pdb.to_pdb(path=newpdbfile+str(i)+'.pdb',\
-            records=['ATOM'], gz=False, append_newline=True)
+    muls=get_movie_muls(mul,movie_steps)
+    make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name)
