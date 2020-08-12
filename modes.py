@@ -65,9 +65,15 @@ def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
     mean1, mean2, cov, s, u, v = calc_coord_stats(coords,coords,unbias=unbias)
     return mean1, mean2, cov, s, u, v
 
-# eignevector should be in nx3 form
+# eignevector should be in nx3 form for single eigenvector
 def get_atom_participation_from_eigenvector(S):
     return np.sum(S**2,axis=1)
+
+# get all atom participations for full
+def get_all_atom_participations(S):
+    new_shape=(int(S.shape[0]/3),3,S.shape[1])
+    P=np.sum(S.reshape(new_shape)**2,axis=1)
+    return P
 
 # normalize and get scaled values
 def get_coloring(P):
