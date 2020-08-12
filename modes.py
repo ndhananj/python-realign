@@ -7,6 +7,28 @@ import matplotlib.pyplot as plt
 
 stat_items=['x_coord', 'y_coord', 'z_coord']
 
+residue_masses={
+"ALA": 55.08,
+"ARG": 140.19,
+"ASN": 98.105,
+"ASP": 99.089,
+"GLN": 112.132,
+"GLU": 113.116,
+"GLY": 41.053,
+"HIS": 121.143,
+"ILE": 97.161,
+"LEU": 97.161,
+"LYS": 112.176,
+"MET": 115.194,
+"PHE": 131.178,
+"PRO": 81.118,
+"SER": 71.079,
+"THR": 85.106,
+"TRP": 170.215,
+"TYR": 147.177,
+"VAL": 83.134
+}
+
 def save_matrix(filename,m):
     with open(filename,'wb') as f:
         np.save(f,m)
