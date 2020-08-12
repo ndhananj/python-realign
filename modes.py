@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 
 stat_items=['x_coord', 'y_coord', 'z_coord']
 
+color_items=['b_factor']
+
 residue_masses={
 "ALA": 55.08,
 "ARG": 140.19,
@@ -63,15 +65,6 @@ def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
     mean1, mean2, cov, s, u, v = calc_coord_stats(coords,coords,unbias=unbias)
     return mean1, mean2, cov, s, u, v
 
-def shift_by_mode(df,mode,indeces,mul):
-    stat_items=['x_coord', 'y_coord', 'z_coord']
-    to_change = df.iloc[match_col_in_int_list(df,'atom_number',indeces)]
-    coords = to_change[stat_items]
-    coords += mode*float(mul)
-    to_ret = to_change.copy()
-    to_ret[stat_items] = coords
-    return to_ret
-
 # eignevector should be in nx3 form
 def get_atom_participation_from_eigenvector(S):
     return np.sum(S**2,axis=1)
@@ -85,6 +78,22 @@ def get_coloring(P):
 def spring_constants_from_variances(D,T=293.1):
     R=8.3145
     return R*T/D
+
+# mode eignevector should be in nx3 form
+def make_color_column(S):
+    P=get_atom_participation_from_eigenvector(S)
+    B=get_coloring(P)
+    return pd.DataFrame(data=B,columns=color_items)
+
+def shift_by_mode(df,mode,indeces,mul):
+    stat_items=['x_coord', 'y_coord', 'z_coord']
+    to_change = df.iloc[match_col_in_int_list(df,'atom_number',indeces)]
+    coords = to_change[stat_items]
+    coords += mode*float(mul)
+    to_ret = to_change.copy()
+    to_ret[stat_items] = coords
+    to_ret[color_items] = make_color_column(mode)
+    return to_ret
 
 def get_movie_muls(mul,movie_steps):
     ts=np.linspace(-float(0),float(movie_steps),num=movie_steps+1)
