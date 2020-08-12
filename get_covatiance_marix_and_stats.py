@@ -15,6 +15,8 @@ if __name__ == '__main__':
     np.core.arrayprint._line_width = 1800
     print("mean ",mean1)
     print("cov ", cov.shape)
+    with open('covariance.npy','wb') as f:
+        np.save(f,cov)
     print("D ", s.shape)
     print("S ", u.shape)
     print("S2 ",v.shape)
