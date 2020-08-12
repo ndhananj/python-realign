@@ -7,6 +7,16 @@ import matplotlib.pyplot as plt
 
 stat_items=['x_coord', 'y_coord', 'z_coord']
 
+def save_matrix(filename,m):
+    with open(filename,'wb') as f:
+        np.save(f,m)
+
+def load_matrix(filename):
+    m = None
+    with open(filename,'rb') as f:
+        m=np.load(f,m)
+    return m
+
 def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
     xvg=read_xvg(xvgfile)
     df = xvg['data']

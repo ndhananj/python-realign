@@ -15,18 +15,16 @@ if __name__ == '__main__':
     np.core.arrayprint._line_width = 1800
     print("mean ",mean1)
     print("cov ", cov.shape)
-    with open('covariance.npy','wb') as f:
-        np.save(f,cov)
+    save_matrix('covariance.npy',cov)
     print("D ", s.shape)
     print("S ", u.shape)
     print("S2 ",v.shape)
     print("sum(S-S2)=",np.sum(u-v))
     print("D = ", s)
-    with open('eigenvalues.npy','wb') as f:
-        np.save(f,s)
+    save_matrix('eigenvalues.npy',s)
+    save_matrix('eigenmatrix.npy',u)
     shift_shape = (int(u.shape[1]/3),3)
     for mode_idx in range(mode_idx_beg,mode_idx_end+1):
         mode = u[:,mode_idx].reshape(shift_shape)
         print("S[:,"+str(mode_idx)+"] =",mode)
-        with open('eigenvector'+str(mode_idx)+'.npy','wb') as f:
-            np.save(f,mode)
+        save_matrix('eigenvector'+str(mode_idx)+'.npy',mode)
