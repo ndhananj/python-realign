@@ -22,6 +22,8 @@ if __name__ == '__main__':
     print("sum(S-S2)=",np.sum(u-v))
     print("D = ", s)
     save_matrix('eigenvalues.npy',s)
+    k=spring_constants_from_variances(s)
+    save_matrix('spring_constants.npy',k)
     save_matrix('eigenmatrix.npy',u)
     shift_shape = (int(u.shape[1]/3),3)
     for mode_idx in range(mode_idx_beg,mode_idx_end+1):
