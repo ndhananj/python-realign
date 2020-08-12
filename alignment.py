@@ -61,8 +61,8 @@ def plot_coords(ax, mean, s, u, df, stat_items=['X','Y','Z'],point_color='b', st
 def find_align_from_singular_vectors(u,v,force_mirror=False,force_no_mirror=False):
     rot_mat = np.matmul(u,v.transpose())
     det = np.linalg.det(rot_mat)
-    print("Rotation determinant is : ", det)
-    print("force_mirror : ", force_mirror, "force_no_mirror : ", force_no_mirror)
+    #print("Rotation determinant is : ", det)
+    #print("force_mirror : ", force_mirror, "force_no_mirror : ", force_no_mirror)
     if((det<0) or force_mirror) and not(force_no_mirror):
         rot_mat =  np.matmul(np.matmul(u,np.diag([1,1,-1])),v.transpose())
         print("Mirroring used")
