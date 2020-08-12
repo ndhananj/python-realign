@@ -59,20 +59,21 @@ def spring_constants_from_variances(D,T=293.1):
     R=8.3145
     return R*T/D
 
-def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul,fit_using_pdb=True):
+def modes(xvgfile,ndxfile,pdbfile,mode_idx,newpdbfile,mul,\
+    fit_using_pdb=True,ndx_name='C-alpha',movie_steps=400):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
-    mode = u[:,int(mode)].reshape(shift_shape)
-    print("u[:,",mode,"] =",mode)
+    mode = u[:,int(mode_idx)].reshape(shift_shape)
+    print("u[:,",mode_idx,"] =",mode)
     ndx=read_ndx(ndxfile)
-    print(ndx['C-alpha'])
+    print(ndx[ndx_name])
     ppdb=PandasPdb()
     ppdb.read_pdb(pdbfile)
-    ts=np.linspace(-float(0),float(400),num=401)
-    muls=float(mul)*np.cos(np.pi*ts/200)
+    ts=np.linspace(-float(0),float(movie_steps),num=movie_steps+1)
+    muls=float(mul)*np.cos(2*np.pi*ts/movie_steps)
     for i in range(len(muls)):
-        new_df = shift_by_mode(ppdb.df['ATOM'],mode,ndx['C-alpha'],muls[i])
+        new_df = shift_by_mode(ppdb.df['ATOM'],mode,ndx[ndx_name],muls[i])
         mode_pdb = PandasPdb()
         mode_pdb.df['ATOM'] = new_df
         mode_pdb.to_pdb(path=newpdbfile+str(i)+'.pdb',\
