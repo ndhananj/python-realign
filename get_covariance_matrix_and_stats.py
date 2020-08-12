@@ -33,6 +33,8 @@ if __name__ == '__main__':
     k=spring_constants_from_variances(D)
     save_matrix('spring_constants.npy',k)
     save_matrix('eigenmatrix.npy',S)
+    P=get_all_atom_participations(S)
+    save_matrix('participations.npy',P)
     shift_shape = (int(S.shape[1]/3),3)
     k_strings = []
     m_strings = []
