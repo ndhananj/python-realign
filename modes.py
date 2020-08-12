@@ -45,6 +45,15 @@ def shift_by_mode(df,primary_mode,indeces,mul):
     to_ret[stat_items] = coords
     return to_ret
 
+# eignevector should be in nx3 form
+def get_atom_participation_from_eigenvector(S):
+    return np.sum(S**2,axis=1)
+
+# normalize and get scales values
+def get_coloring(P):
+    m = np.max(P)
+    return np.cbrt(P/m)
+
 def modes(xvgfile,ndxfile,pdbfile,mode,newpdbfile,mul,fit_using_pdb=True):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)

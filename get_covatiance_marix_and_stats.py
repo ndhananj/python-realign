@@ -28,3 +28,7 @@ if __name__ == '__main__':
         mode = u[:,mode_idx].reshape(shift_shape)
         print("S[:,"+str(mode_idx)+"] =",mode)
         save_matrix('eigenvector'+str(mode_idx)+'.npy',mode)
+        P = get_atom_participation_from_eigenvector(mode)
+        save_matrix('participation'+str(mode_idx)+'.npy',P)
+        B = get_coloring(P)
+        save_matrix('colors'+str(mode_idx)+'.npy',B)
