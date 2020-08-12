@@ -29,6 +29,11 @@ residue_masses={
 "VAL": 83.134
 }
 
+def get_masses_from_pdb_by_resn(pdb):
+    residues=pdb.df['ATOM'][['residue_name']].to_numpy().tolist()
+    masses=[residue_masses[residue[0]] for residue in residues]
+    return masses
+    
 def save_matrix(filename,m):
     with open(filename,'wb') as f:
         np.save(f,m)
