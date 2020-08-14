@@ -78,7 +78,7 @@ def get_all_atom_participations(S):
 # get effective masses from an array of masses and full participations
 def get_effective_masses(masses,P):
     ems=np.matmul(masses.reshape(1,masses.shape[0]),P)
-    return ems
+    return ems.flatten()
 
 # get angular_frequencies form spring constants and effective get_masses
 def get_angular_freq(k,em):
@@ -104,6 +104,14 @@ def get_coloring(P):
 def spring_constants_from_variances(D,T=293.1):
     R=8.3145
     return R*T/D
+
+# calculate effective masses and derived stats
+def calc_em_and_derived_stats(masses,P,k):
+    ems=get_effective_masses(masses,P)
+    omegas=get_angular_freq(k,ems)
+    nus=convert_angular_freq_to_freq(omegas)
+    Ts=get_period_from_frequency(nus)
+    return ems, omegas, nus, Ts
 
 # mode eignevector should be in nx3 form
 def make_color_column(S):
