@@ -35,6 +35,15 @@ if __name__ == '__main__':
     save_matrix('eigenmatrix.npy',S)
     P=get_all_atom_participations(S)
     save_matrix('participations.npy',P)
+    if None is not masses:
+        ems=get_effective_masses(masses,P)
+        save_matrix('effective_masses.npy',ems)
+        omegas=get_angular_freq(k,ems)
+        save_matrix('angular_frequencies.npy',omegas)
+        nus=convert_angular_freq_to_freq(omegas)
+        save_matrix('frequencies.npy',nus)
+        periods=get_period_from_frequency(nus)
+        save_matrix('periods.npy',periods)
     shift_shape = (int(S.shape[1]/3),3)
     k_strings = []
     m_strings = []
@@ -49,7 +58,7 @@ if __name__ == '__main__':
         save_matrix('participation'+str(mode_idx)+'.npy',P)
         B = get_coloring(P)
         save_matrix('colors'+str(mode_idx)+'.npy',B)
-        if masses:
+        if None is not masses:
             em=P.dot(masses)
             omega=np.sqrt(k[mode_idx]/em)*1e13 # omega in rads/s
             nu=omega/(2*np.pi) # nu in Hz
@@ -59,7 +68,7 @@ if __name__ == '__main__':
             omega_strings.append(f"{omega:.2e} rads/s")
             nu_strings.append(f"{nu:.2e} Hz")
             T_strings.append(f"{T:.2e} s")
-    if masses:
+    if None is not masses:
         print("spring constants:",k_strings)
         print("effective masses:",m_strings)
         print("omegas:",omega_strings)

@@ -34,7 +34,7 @@ residue_masses={
 def get_masses_from_pdb_by_resn(pdb):
     residues=pdb.df['ATOM'][['residue_name']].to_numpy().tolist()
     masses=[residue_masses[residue[0]] for residue in residues]
-    return masses
+    return np.array(masses)
 
 def save_matrix(filename,m):
     with open(filename,'wb') as f:
@@ -74,6 +74,26 @@ def get_all_atom_participations(S):
     new_shape=(int(S.shape[0]/3),3,S.shape[1])
     P=np.sum(S.reshape(new_shape)**2,axis=1)
     return P
+
+# get effective masses from an array of masses and full participations
+def get_effective_masses(masses,P):
+    ems=np.matmul(masses.reshape(1,masses.shape[0]),P)
+    return ems
+
+# get angular_frequencies form spring constants and effective get_masses
+def get_angular_freq(k,em):
+    omega=np.sqrt(k/em)*1e13 # omega in rads/s
+    return omega
+
+#convert angular frequency to frequency
+def convert_angular_freq_to_freq(omega):
+    nu=omega/(2*np.pi)  # nu in Hz
+    return nu
+
+#get period from frequency
+def get_period_from_frequency(nu):
+    T=1.0/nu # period in secods
+    return T
 
 # normalize and get scaled values
 def get_coloring(P):
