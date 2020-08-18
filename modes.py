@@ -102,7 +102,7 @@ def get_coloring(P):
 
 # Will retunr in KJ/mol/Angtrom^2 assuming D is in Angtrom^2
 def spring_constants_from_variances(D,T=293.1):
-    R=8.3145
+    R=8.3145e-3 #KJ/mol/Kelvin
     return R*T/D
 
 # calculate effective masses and derived stats
@@ -129,6 +129,17 @@ def shift_by_mode(df,mode,indeces,mul):
     to_ret[color_items] = make_color_column(mode)
     return to_ret
 
+# combine individual frames into a complete pdb movie
+def concatenate_pdbs(pdb_frame, frame_index, movie_pdb_file):
+    # concatenation loop
+    movie_pdb_file.write("TITLE    frame t= " + str(frame_index) +"\n")
+    movie_pdb_file.write("MODEL    1\n")
+    with open(pdb_frame, 'r') as f:
+        movie_pdb_file.write(f.read())
+    movie_pdb_file.write("TER\n")
+    movie_pdb_file.write("ENDMDL\n")
+
+# get multiplier for a movie
 def get_movie_muls(mul,movie_steps):
     ts=np.linspace(-float(0),float(movie_steps),num=movie_steps+1)
     muls=float(mul)*np.cos(2*np.pi*ts/movie_steps)
@@ -139,19 +150,31 @@ def make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
     print(ndx[ndx_name])
     ppdb=PandasPdb()
     ppdb.read_pdb(pdbfile)
+    movie_pdb_file = newpdbfile+'.pdb'
+    movie = open(movie_pdb_file, 'w')
     for i in range(len(muls)):
         new_df = shift_by_mode(ppdb.df['ATOM'],mode,ndx[ndx_name],muls[i])
         mode_pdb = PandasPdb()
         mode_pdb.df['ATOM'] = new_df
-        mode_pdb.to_pdb(path=newpdbfile+str(i)+'.pdb',\
+        pdb_frame = newpdbfile+"_"+str(i)+'.pdb'
+        mode_pdb.to_pdb(path=pdb_frame,\
             records=['ATOM'], gz=False, append_newline=True)
+        concatenate_pdbs(pdb_frame, i, movie)
+        os.remove(pdb_frame)
+    movie.close()
 
-def modes(xvgfile,ndxfile,pdbfile,mode_idx,newpdbfile,mul,\
-    fit_using_pdb=True,ndx_name='C-alpha',movie_steps=200):
+def create_mode_movie(mul,movie_steps,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
+    muls=get_movie_muls(mul,movie_steps)
+    make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name)
+
+def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
+    fit_using_pdb=True,ndx_name='System',movie_steps=200):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
-    mode = u[:,int(mode_idx)].reshape(shift_shape)
-    print("u[:,",mode_idx,"] =",mode)
-    muls=get_movie_muls(mul,movie_steps)
-    make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name)
+    for mode_idx in mode_indices:
+        mode_pdb_file=newpdbfile+"_mode"+str(mode_idx)
+        mode = u[:,int(mode_idx)].reshape(shift_shape)
+        print("u[:,",mode_idx,"] =",mode)
+        create_mode_movie(mul,movie_steps,\
+            ndxfile,pdbfile,mode,mode_pdb_file,ndx_name)
