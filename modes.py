@@ -102,7 +102,7 @@ def get_coloring(P):
 
 # get all the colorings for each column
 def get_all_colorings(P):
-    return np.apply_along_axis(get_coloring, 1, P)
+    return np.apply_along_axis(get_coloring, 0, P)
 
 
 # Will retunr in KJ/mol/Angtrom^2 assuming D is in Angtrom^2
