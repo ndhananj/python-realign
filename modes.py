@@ -120,7 +120,7 @@ def calc_em_k_derived_stats(k,ems):
 # calculate effective masses and derived stats
 def calc_em_and_derived_stats(masses,P,k):
     ems=get_effective_masses(masses,P)
-    omegas, nus, Ts = cal_em_k_derived_stats(k,ems)
+    omegas, nus, Ts = calc_em_k_derived_stats(k,ems)
     return ems, omegas, nus, Ts
 
 # mode eignevector should be in nx3 form
