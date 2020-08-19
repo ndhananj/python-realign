@@ -100,17 +100,27 @@ def get_coloring(P):
     m = np.max(P)
     return np.cbrt(P/m)
 
+# get all the colorings for each column
+def get_all_colorings(P):
+    return np.apply_along_axis(get_coloring, 1, P)
+
+
 # Will retunr in KJ/mol/Angtrom^2 assuming D is in Angtrom^2
 def spring_constants_from_variances(D,T=293.1):
     R=8.3145e-3 #KJ/mol/Kelvin
     return R*T/D
 
-# calculate effective masses and derived stats
-def calc_em_and_derived_stats(masses,P,k):
-    ems=get_effective_masses(masses,P)
+# calculate effective mass spring constant derived stats
+def calc_em_k_derived_stats(k,ems):
     omegas=get_angular_freq(k,ems)
     nus=convert_angular_freq_to_freq(omegas)
     Ts=get_period_from_frequency(nus)
+    return omegas, nus, Ts
+
+# calculate effective masses and derived stats
+def calc_em_and_derived_stats(masses,P,k):
+    ems=get_effective_masses(masses,P)
+    omegas, nus, Ts = cal_em_k_derived_stats(k,ems)
     return ems, omegas, nus, Ts
 
 # mode eignevector should be in nx3 form
@@ -147,7 +157,7 @@ def get_movie_muls(mul,movie_steps):
 
 def make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
     ndx=read_ndx(ndxfile)
-    print(ndx[ndx_name])
+    #print(ndx[ndx_name])
     ppdb=PandasPdb()
     ppdb.read_pdb(pdbfile)
     movie_pdb_file = newpdbfile+'.pdb'
@@ -175,6 +185,6 @@ def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
     for mode_idx in mode_indices:
         mode_pdb_file=newpdbfile+"_mode"+str(mode_idx)
         mode = u[:,int(mode_idx)].reshape(shift_shape)
-        print("u[:,",mode_idx,"] =",mode)
+        #print("u[:,",mode_idx,"] =",mode)
         create_mode_movie(mul,movie_steps,\
             ndxfile,pdbfile,mode,mode_pdb_file,ndx_name)
