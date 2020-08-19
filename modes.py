@@ -63,7 +63,7 @@ def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
             src_cs[i] = realign_coords(src_cs[i],src_mu, trg_mu, rot_mat)
         coords = src_cs.reshape((coords.shape[0],coords.shape[1]))
     mean1, mean2, cov, s, u, v = calc_coord_stats(coords,coords,unbias=unbias)
-    return mean1, mean2, cov, s, u, v
+    return mean1, mean2, cov, s, u, v, coords
 
 # eignevector should be in nx3 form for single eigenvector
 def get_atom_participation_from_eigenvector(S):
@@ -180,7 +180,7 @@ def create_mode_movie(mul,movie_steps,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
 def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
     fit_using_pdb=True,ndx_name='System',movie_steps=200):
     fitfile = pdbfile if fit_using_pdb else None
-    mean1, mean2, cov, s, u, v = get_xvg_stats(xvgfile,fitfile=fitfile)
+    mean1, mean2, cov, s, u, v, coords = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
     for mode_idx in mode_indices:
         mode_pdb_file=newpdbfile+"_mode"+str(mode_idx)
