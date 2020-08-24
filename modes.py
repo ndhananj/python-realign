@@ -205,3 +205,20 @@ def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
         #print("u[:,",mode_idx,"] =",mode)
         create_mode_movie(mul,movie_steps,\
             ndxfile,pdbfile,mode,mode_pdb_file,ndx_name)
+
+# get the involvement of specific residues in a mode based on participation
+def involvement_in_mode_based_on_participation(P,resi,toInclude):
+    num_res=resi.shape[0]
+    I=np.sum([P[:,i] for i in range(num_res) if resi[i] in toInclude],axis=0)
+    return I
+
+# plot involvemenet
+def plot_involvement(I,involvement_string="Involvement"):
+    fig= plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(I)
+    ax.set_xlabel('Mode')
+    ax.set_ylabel(involvement_string)
+    plt.ylim(I.min()*1.1,I.max()*1.1)
+    plt.savefig(involvement_string+".jpg")
+    #plt.show()
