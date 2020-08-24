@@ -10,13 +10,15 @@ def get_mass_derived_stats(pdbForMasses,\
     effective_masses='effective_masses.npy',\
     angular_frequencies='angular_frequencies.npy',\
     frequencies='frequencies.npy',\
-    periods='periods.npy'):
+    periods='periods.npy',\
+    residues='residues.npy'):
     # input files
     P=load_matrix(participations)
     k = load_matrix(spring_constants)
     pdb=PandasPdb()
     pdb.read_pdb(pdbForMasses)
     masses=get_masses_from_pdb_by_resn(pdb)
+    resi = get_resi(pdb)
     # calculate effective masses and derived stats
     ems, omegas, nus, Ts = calc_em_and_derived_stats(masses,P,k)
     # write out calculated matrices
@@ -24,6 +26,7 @@ def get_mass_derived_stats(pdbForMasses,\
     save_matrix(angular_frequencies,omegas)
     save_matrix(frequencies,nus)
     save_matrix(periods,Ts)
+    save_matrix(residues,resi)
 
 if __name__ == '__main__':
     #inputs
@@ -41,6 +44,8 @@ if __name__ == '__main__':
         else 'frequencies.npy'
     periods = sys.argv[7] if len(sys.argv)>7 \
         else 'periods.npy'
+    residues = sys.argv[8] if len(sys.argv)>8 \
+        else 'residues.npy'
     #calculate
     get_mass_derived_stats(pdbForMasses,\
         participations,\
@@ -48,4 +53,5 @@ if __name__ == '__main__':
         effective_masses,\
         angular_frequencies,\
         frequencies,\
-        periods)
+        periods, \
+        residues)

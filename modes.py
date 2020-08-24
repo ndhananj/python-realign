@@ -9,6 +9,8 @@ stat_items=['x_coord', 'y_coord', 'z_coord']
 
 color_items=['b_factor']
 
+resi_tems=['residue_number']
+
 residue_masses={
 "ALA": 55.08,
 "ARG": 140.19,
@@ -30,6 +32,15 @@ residue_masses={
 "TYR": 147.177,
 "VAL": 83.134
 }
+
+def get_resi_from_atoms(atoms):
+    return atoms[resi_tems].to_numpy().astype(int).flatten()
+
+def get_resi_from_df(df):
+    return get_resi_from_atoms(df['ATOM'])
+
+def get_resi(pdb):
+    return get_resi_from_df(pdb.df)
 
 def get_masses_from_pdb_by_resn(pdb):
     residues=pdb.df['ATOM'][['residue_name']].to_numpy().tolist()
@@ -96,14 +107,19 @@ def get_period_from_frequency(nu):
     return T
 
 # normalize and get scaled values
-def get_coloring(P):
-    m = np.max(P)
-    return np.cbrt(P/m)
+def get_coloring(P,resi):
+    rP = np.zeros(np.max(resi)+1)
+    num_res = resi.shape[0]
+    for i in range(num_res):
+        rP[resi[i]]+=P[i]
+    m = np.max(rP)
+    rP = np.cbrt(rP/m)
+    return [rP[resi[i]] for i in range(num_res)]
 
 # get all the colorings for each column
-def get_all_colorings(P):
-    return np.apply_along_axis(get_coloring, 0, P)
-
+def get_all_colorings(P,resi):
+    f = lambda x : get_coloring(x,resi)
+    return np.apply_along_axis(f, 0, P)
 
 # Will retunr in KJ/mol/Angtrom^2 assuming D is in Angtrom^2
 def spring_constants_from_variances(D,T=293.1):
@@ -124,19 +140,20 @@ def calc_em_and_derived_stats(masses,P,k):
     return ems, omegas, nus, Ts
 
 # mode eignevector should be in nx3 form
-def make_color_column(S):
+def make_color_column(S,resi):
     P=get_atom_participation_from_eigenvector(S)
-    B=get_coloring(P)
+    B=get_coloring(P,resi)
     return pd.DataFrame(data=B,columns=color_items)
 
 def shift_by_mode(df,mode,indeces,mul):
     stat_items=['x_coord', 'y_coord', 'z_coord']
     to_change = df.iloc[match_col_in_int_list(df,'atom_number',indeces)]
+    resi = get_resi_from_atoms(df)
     coords = to_change[stat_items]
     coords += mode*float(mul)
     to_ret = to_change.copy()
     to_ret[stat_items] = coords
-    to_ret[color_items] = make_color_column(mode)
+    to_ret[color_items] = make_color_column(mode,resi)
     return to_ret
 
 # combine individual frames into a complete pdb movie
@@ -178,7 +195,7 @@ def create_mode_movie(mul,movie_steps,ndxfile,pdbfile,mode,newpdbfile,ndx_name):
     make_movie_from_muls(muls,ndxfile,pdbfile,mode,newpdbfile,ndx_name)
 
 def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
-    fit_using_pdb=True,ndx_name='System',movie_steps=200):
+    fit_using_pdb=True,ndx_name='System',movie_steps=150):
     fitfile = pdbfile if fit_using_pdb else None
     mean1, mean2, cov, s, u, v, coords = get_xvg_stats(xvgfile,fitfile=fitfile)
     shift_shape = (int(u.shape[1]/3),3)
