@@ -57,10 +57,14 @@ def load_matrix(filename):
         m=np.load(f,m)
     return m
 
-def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
+def get_xvg_coords(xvgfile):
     xvg=read_xvg(xvgfile)
     df = xvg['data']
     coords = df.filter(items=xvg['yaxis labels']).to_numpy()*10 #nm to A
+    return coords
+
+def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
+    coords=get_xvg_coords(xvgfile)
     if(fitfile):
         print("Fitting...")
         src_cs_shape = (coords.shape[0],int(coords.shape[1]/3),3)
@@ -221,4 +225,30 @@ def plot_involvement(I,involvement_string="Involvement"):
     ax.set_ylabel(involvement_string)
     plt.ylim(I.min()*1.1,I.max()*1.1)
     plt.savefig(involvement_string+".jpg")
+    #plt.show()
+
+# calculate surface area of triangles made from centroid
+def calc_triangulated_surface_area(xvgfile):
+    coords=get_xvg_coords(xvgfile)
+    cs_shape = (coords.shape[0],int(coords.shape[1]/3),3)
+    cs = coords.reshape(cs_shape)
+    centroid = np.mean(cs,axis=1)
+    vecs = np.array([cs[i]-centroid[i] for i in range(cs.shape[0]) ])
+    all_areas= np.array([np.linalg.norm(np.cross(vecs[:,i-1],vecs[:,i]),axis=1) \
+       for i in range(1,vecs.shape[1])])
+    areas=np.sum(all_areas,axis=0)
+    return 0.5*areas
+
+# plot areas
+def plot_area(A,time_step=0.05,area_string="Area"):
+    N=A.shape[0]
+    T=N*time_step
+    times=np.linspace(0,T,num=N)
+    fig= plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(times,A)
+    ax.set_xlabel('Time (ps)')
+    ax.set_ylabel(area_string)
+    plt.ylim(A.min()*0.9,A.max()*1.1)
+    plt.savefig(area_string+".jpg")
     #plt.show()
