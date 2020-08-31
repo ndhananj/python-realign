@@ -11,6 +11,7 @@ def get_involvement(involved_residues,\
     toInclude = np.array(f.read().split()).astype(int)
     I=involvement_in_mode_based_on_participation(\
         P,resi,toInclude)
+    save_matrix(involvement_string+'.npy',I)
     plot_involvement(I,involvement_string)
 
 if __name__ == '__main__':
