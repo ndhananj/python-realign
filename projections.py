@@ -215,7 +215,7 @@ def num_3D_adj(my_center,bool_grid):
                             num+=bool_grid[x,y,z]
     return num
 
-def get_3D_con_fill(bool_grid,grid,recur=1,count=20):
+def get_3D_con_fill(bool_grid,recur=1,count=20):
     toRet=bool_grid.copy()
     print(len(np.argwhere(bool_grid)))
     for center in np.argwhere(bool_grid):
@@ -224,7 +224,7 @@ def get_3D_con_fill(bool_grid,grid,recur=1,count=20):
     print(len(np.argwhere(bool_grid)))
     print(len(np.argwhere(toRet)))
     return toRet if recur==0 else get_3D_con_fill(\
-        toRet,grid,recur=recur-1,count=count)
+        toRet,recur=recur-1,count=count)
 
 def grid_to_centers(bool_grid,grid):
     saved=[]
@@ -255,13 +255,12 @@ def get_3D_fill_from_grid(coords, radii, g_coords, probe_size, con_len, grid):
             bool_grid[X,Y,Z]=True
     orig_centers = grid_to_centers(bool_grid,grid)
     print(np.sum(np.array(saved)- orig_centers))
-    bool_grid=get_3D_con_fill(bool_grid,grid)
+    bool_grid=get_3D_con_fill(bool_grid)
     print(np.mean(orig_centers)-np.mean(grid_to_centers(bool_grid,grid)))
     #return np.array(saved)
     return grid_to_centers(bool_grid,grid)
 
-def get_negative_fill_3D(filename,out_file,probe_elem='H'):
-    df, radii, coords, n = pdb_atoms(filename)
+def get_negative_fill_3D_no_output(coords,radii,probe_elem='H'):
     pca=PCA(n_components=3)
     pca.fit(coords)
     t_coords = pca.transform(coords)
@@ -272,5 +271,10 @@ def get_negative_fill_3D(filename,out_file,probe_elem='H'):
     print(tf_coords.shape)
     f_coords = pca.inverse_transform(tf_coords)
     centers = pd.DataFrame(data=f_coords,columns=[10,11,12])
+    return centers
+
+def get_negative_fill_3D(filename,out_file,probe_elem='H'):
+    df, radii, coords, n = pdb_atoms(filename)
+    centers=get_negative_fill_3D_no_output(coords,radii,probe_elem='H')
     output_centers(centers,probe_elem,out_file)
     return coords
