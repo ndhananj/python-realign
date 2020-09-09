@@ -58,13 +58,11 @@ def load_matrix(filename):
     return m
 
 def get_xvg_coords(xvgfile):
-    xvg=read_xvg(xvgfile)
-    df = xvg['data']
-    coords = df.filter(items=xvg['yaxis labels']).to_numpy()*10 #nm to A
-    return coords
+    return get_xvg_data_array_from_file(xvgfile)[:,1:]*10 #nm to A
 
 def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
     coords=get_xvg_coords(xvgfile)
+    print("Shape of data:",coords.shape)
     if(fitfile):
         print("Fitting...")
         src_cs_shape = (coords.shape[0],int(coords.shape[1]/3),3)
@@ -213,14 +211,15 @@ def modes(xvgfile,ndxfile,pdbfile,mode_indices,newpdbfile,mul,\
 # get the involvement of specific residues in a mode based on participation
 def involvement_in_mode_based_on_participation(P,resi,toInclude):
     num_res=resi.shape[0]
-    I=np.sum([P[:,i] for i in range(num_res) if resi[i] in toInclude],axis=0)
+    I=np.sum([P[i,:] for i in range(num_res) if resi[i] in toInclude],axis=0)
     return I
 
 # plot involvemenet
-def plot_involvement(I,involvement_string="Involvement"):
+def plot_involvement(I,involvement_string="Involvement",mode_end=40):
     fig= plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(I)
+    mode_end = I.shape[0] if None==mode_end else mode_end
+    ax.bar(range(mode_end),I[:mode_end])
     ax.set_xlabel('Mode')
     ax.set_ylabel(involvement_string)
     plt.ylim(I.min()*1.1,I.max()*1.1)
