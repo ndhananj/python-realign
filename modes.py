@@ -230,7 +230,7 @@ def plot_involvement(I,involvement_string="Involvement",mode_end=40):
     ax.bar(range(mode_end),I[:mode_end])
     ax.set_xlabel('Mode')
     ax.set_ylabel(involvement_string)
-    plt.ylim(I.min()*1.1,I.max()*1.1)
+    plt.ylim(I[:mode_end].min()*1.1,I[:mode_end].max()*1.1)
     plt.savefig(involvement_string+".jpg")
     #plt.show()
 
