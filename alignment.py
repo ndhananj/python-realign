@@ -12,6 +12,12 @@ import sys
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import matplotlib.pyplot as plt
 
+def calc_single_coord_stats(coords,unbias=False):
+    mean = coords.mean(axis=0)
+    cov = np.cov((coords-mean).T,bias=not(unbias))
+    u, s, vh = svd(cov)
+    return mean, cov, s, u, vh.T
+
 def calc_coord_stats(coords1,coords2,unbias=False):
     mean1 = coords1.mean(axis=0)
     mean2 = coords2.mean(axis=0)
