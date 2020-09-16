@@ -83,8 +83,8 @@ def get_xvg_stats(xvgfile,fitfile=None,unbias=False):
         trg_c = pdb.df['ATOM'].filter(items=stat_items).to_numpy()
         get_fitted_coords(coords,trg_c,unbias=unbias)
     print("Calculating stats...")
-    mean1, mean2, cov, s, u, v = calc_coord_stats(coords,coords,unbias=unbias)
-    return mean1, mean2, cov, s, u, v, coords
+    mean, cov, s, u, v = calc_single_coord_stats(coords,unbias=unbias)
+    return mean, cov, s, u, v, coords
 
 # eignevector should be in nx3 form for single eigenvector
 def get_atom_participation_from_eigenvector(S):
