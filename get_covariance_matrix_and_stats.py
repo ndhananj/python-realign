@@ -12,7 +12,7 @@ def get_covariance_matrix_and_stats(xvg_input,\
     eigenvalues='eigenvalues.npy', \
     eigenmatrix='eigenmatrix.npy', \
     participations='participations.npy'):
-    mean1, mean2, cov, D, S, S2, coords = \
+    mean, cov, D, S, S2, coords = \
         get_xvg_stats(xvg_input,fitfile=pdbToAlign,unbias=unbias)
     err = np.abs(S-S2)
     k=spring_constants_from_variances(D)
