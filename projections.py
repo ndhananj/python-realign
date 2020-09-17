@@ -226,6 +226,26 @@ def get_3D_con_fill(bool_grid,recur=1,count=20):
     return toRet if recur==0 else get_3D_con_fill(\
         toRet,recur=recur-1,count=count)
 
+def get_3D_cetral_comp(bool_grid): ##### in progress
+    grid_center = (bool_grid.shape)/2
+    ret_grid = np.zeros(bool_grid.shape).astype(bool)
+    component_size=0
+    central_component={grid_center}
+    new_component_size=len(central_component)
+    while component_size<new_component_size :
+        component_size = new_component_size
+        to_add = set()
+        for center in central_component:
+            adj_mask=adj_con_mask(X,Y,center,con_len)
+            idxs = np.argwhere(adj_mask)
+            bools = con_fill[adj_mask]
+            neighbors={(idxs[i][0],idxs[i][1]) \
+                for i in range(len(idxs)) if bools[i]}
+            to_add|=neighbors
+        central_component.update(to_add)
+        new_component_size =len(central_component)
+
+
 def grid_to_centers(bool_grid,grid):
     saved=[]
     for center in np.argwhere(bool_grid):
